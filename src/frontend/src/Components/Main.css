@@ -4,12 +4,15 @@
     display: flex;
     justify-content: center;
 }
-
+body{
+    background-color: RGB(255, 255, 244);
+}
 h1{
     text-align: center;
+    font-family: cursive;
 }
 
-ul{
+.semester-heading{
     list-style: none;
     font-size: xx-large;
     text-decoration: underline;
