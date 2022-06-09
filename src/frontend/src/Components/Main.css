@@ -1,0 +1,17 @@
+.inputStyle{
+    width: 50%;
+    margin: 2rem auto;
+    display: flex;
+    justify-content: center;
+}
+
+h1{
+    text-align: center;
+}
+
+ul{
+    list-style: none;
+    font-size: xx-large;
+    text-decoration: underline;
+    color: black;
+}
