@@ -3,6 +3,7 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import './Main.css';
+import Semester from './Semester';
 
 const Main = () => {
     const [newSemester, setNewSemester] = useState('');
@@ -32,8 +33,8 @@ const Main = () => {
                     <Button onClick={addSemesterHandler} className="buttonStyle" variant="contained">Add Semester</Button>
                 </Box>
             </div>
-           <ul>
-                {semesters.map((semester) => <li>{semester.toUpperCase()}</li>)}
+            <ul className='semester-heading'>
+                {semesters.map((semester) => <Semester semesterName={semester}/>)}
             </ul>
         </React.Fragment>
     );
