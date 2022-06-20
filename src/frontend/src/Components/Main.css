@@ -14,7 +14,14 @@ h1{
 
 .semester-heading{
     list-style: none;
-    font-size: xx-large;
-    text-decoration: underline;
+    font-size: large;
     color: black;
+    padding-inline-start: 0;
+}
+
+.semester-heading ul {
+    padding-inline-start: 0rem;
+}
+.semester-heading p{
+    padding-inline-start: 0rem;
 }

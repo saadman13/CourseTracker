@@ -6,20 +6,74 @@
 }
 
 .course-input{
-    display: flex;
+    width: 100px;
+    height: 10px;
+    margin-left: 3rem;
+    padding: 0.5rem;
+}
 
+.course-span{
+    display:flex;
+    align-items: center;
+}
+
+a {
+    font-size: medium;
+    text-decoration: none;
+}
+
+a:hover{
+    color: orange;
+}
+
+
+.course{
+    width: 150px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .btn {
-    border: none;
-    background-color: inherit;
-    padding: 14px 28px;
-    font-size: 16px;
+    
+    /* background-color: inherit; */
+    background-color: RGB(95, 230, 46);
+    border-radius: 2rem;
     cursor: pointer;
-    display: inline-block;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    color: white;
+}
 
+.btn:hover{
+    background-color: green;
+}
+
+
+.delete-course-btn{
+    border: 1px solid grey;
+    background-color: orange;
+    margin-left: 1rem;
+    border-radius: 10%;
+}
+
+.delete-course-btn:hover{
+    background-color:red;
+    cursor:pointer;
 }
 
 h2{
     font-family: cursive;
 }
+
+.del-sem-btn{
+    border-radius: 2rem;
+    background-color: RGB(230, 46, 64);
+    color: white;
+    cursor: pointer;
+}
+
+.del-sem-btn:hover{
+    background-color:red;
+}
+

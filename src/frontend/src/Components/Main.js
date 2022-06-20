@@ -4,6 +4,8 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import './Main.css';
 import Semester from './Semester';
+import {semesterData} from '../Data/semesterData'
+import { ThirtyFpsOutlined } from '@mui/icons-material';
 
 
 class Main extends React.Component {
@@ -15,15 +17,29 @@ class Main extends React.Component {
         }
     }
 
+    componentDidMount = () => {
+        this.setState({semesters: semesterData});
+    }
+
     onChangeHandler = (event) => {
         console.log(event.target.value);
         this.setState({newSemester: event.target.value});
     }
 
     addSemesterHandler = (event) => {
-        this.setState(state => ({
-            semesters: [...state.semesters, state.newSemester]
-        }));
+        this.setState(state => {
+           return {
+            semesters: [ state.newSemester, ...state.semesters],
+            newSemester: ''
+           }
+    });
+    }
+
+    deleteSemesterHandler = (semesterName) => {
+        console.log("Sem being deleted");
+        this.setState((state) => {
+            return {semesters: state.semesters.filter(semester => semester !== semesterName)};
+        });
     }
 
     render() {
@@ -38,13 +54,13 @@ class Main extends React.Component {
                         }}
                     >
                         <Box mb={3} pt={3}>
-                            <TextField onChange={this.onChangeHandler} fullWidth label="Semester Name" id="fullWidth" />
+                            <TextField onChange={this.onChangeHandler} value={this.state.newSemester} fullWidth label="Semester Name" id="fullWidth" />
                         </Box>
                         <Button onClick={this.addSemesterHandler} className="buttonStyle" variant="contained">Add Semester</Button>
                     </Box>
                 </div>
                 <ul className='semester-heading'>
-                    {this.state.semesters.map((semester) => <Semester semesterName={semester}/>)}
+                    {this.state.semesters.map((semester) => <Semester deleteSemesterHandler={this.deleteSemesterHandler} semesterName={semester}/>)}
                 </ul>
             </React.Fragment>
     )}
