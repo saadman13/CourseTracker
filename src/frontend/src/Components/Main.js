@@ -5,8 +5,6 @@ import Button from '@mui/material/Button';
 import './Main.css';
 import Semester from './Semester';
 import {semesterData} from '../Data/semesterData'
-import { ThirtyFpsOutlined } from '@mui/icons-material';
-
 
 class Main extends React.Component {
     constructor(props) {
@@ -60,7 +58,7 @@ class Main extends React.Component {
                     </Box>
                 </div>
                 <ul className='semester-heading'>
-                    {this.state.semesters.map((semester) => <Semester deleteSemesterHandler={this.deleteSemesterHandler} semesterName={semester}/>)}
+                    {this.state.semesters.map((semester, idx) => <Semester key={semester} deleteSemesterHandler={this.deleteSemesterHandler} semesterName={semester}/>)}
                 </ul>
             </React.Fragment>
     )}
