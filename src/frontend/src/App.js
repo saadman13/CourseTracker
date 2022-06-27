@@ -1,13 +1,20 @@
 import React from 'react';
-import './App.css';
 import Main from './Components/Main';
+import Home from './Components/Home';
+import Signup from './Components/Signup';
+import { Route } from 'react-router-dom';
 
 
 class App extends React.Component {
   render() {
     return (
-      <div className="">
-        <Main />
+      <div>
+        <Route path="/home">
+          <Main/>
+        </Route>
+        <Route path="/">
+          <Home/>
+        </Route>
       </div>
     );
   }
