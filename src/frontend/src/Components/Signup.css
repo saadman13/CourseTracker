@@ -1,0 +1,37 @@
+.sign-up-form-container{
+    display:flex;
+    justify-content: center;
+    margin-top: 1.5em;
+}
+
+.form-internal{
+    display:flex;
+    flex-direction: column;
+    /* border: 1px solid red; */
+    width: 18em;
+}
+
+.form-internal label{
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    font-size: small;
+}
+
+.form-internal input{
+    margin-bottom: 0.5em;
+}
+
+.small-signup-btn {
+    display: inline-block;
+    width: 70px;
+    height: 8px;
+    background: #4E9CAF;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    font-size: small;
+    line-height: 8px;
+    cursor: pointer;
+}
