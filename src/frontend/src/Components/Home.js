@@ -29,13 +29,15 @@ export default class Home extends React.Component {
     }
 
     render(){
+        let signUpStyle = `button sign-up ${this.state.isSignup ? 'active' : ''}`;
+        let signInStyle = `button sign-in ${this.state.isSignup ? '' : 'active'}`;
         return (
         <div class='main-main-container'>
             <h1> Lets manage your courses!</h1>
             <div class='main-container'>
                 <div class="btn-container">
-                    <Link onClick={this.signupToggleHandler} to='/signup' className='button sign-up'>Sign up</Link>
-                    <Link onClick={this.signinToggleHandler} to='/signin' className='button sign-in'>Sign in</Link>
+                    <Link onClick={this.signupToggleHandler} to='/signup' className={signUpStyle}>Sign up</Link>
+                    <Link onClick={this.signinToggleHandler} to='/signin' className={signInStyle}>Sign in</Link>
                 </div>
             </div>
             { this.state.isSignup && <Signup /> }
