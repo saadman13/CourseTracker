@@ -7,8 +7,11 @@ from .serializers import CustomUserSerializer
 
 class CustomUserCreate(APIView):
     permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
 
     def post(self, request, format='json'):
+        # import pdb;
+        # pdb.set_trace();
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
