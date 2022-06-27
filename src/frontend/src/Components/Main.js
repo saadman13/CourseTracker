@@ -43,7 +43,7 @@ class Main extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <h1>Welcome To Course Tracker</h1>
+                <h1 className='title'>Welcome To Course Tracker</h1>
                 <div className='inputStyle'>
                     <Box
                         sx={{
