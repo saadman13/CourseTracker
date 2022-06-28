@@ -1,5 +1,8 @@
 import React from 'react';
 import './Signup.css';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import { browserHistory} from 'react-router';
 import {axiosInstance} from '../axiosApi';
 class Signup extends React.Component{
     constructor(props){
@@ -8,6 +11,7 @@ class Signup extends React.Component{
             email: '',
             password: '',
             confirmPassword: '',
+            isLoading: false,
         }
 
         this.handleEmailChange = this.handleEmailChange.bind(this);
@@ -35,6 +39,7 @@ class Signup extends React.Component{
 
     handleSignup = async (event) => {
         event.preventDefault();
+        this.setState({isLoading: true});
         try {
             const response = await axiosInstance.post('user/create/', {
                 email: this.state.email,
@@ -43,25 +48,35 @@ class Signup extends React.Component{
             axiosInstance.defaults.headers['Authorization'] = "JWT " + response.data.access;
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
+            this.setState({isLoading: false});
             return response;
         } catch (error) {
+            console.log("Eroor is here")
+            this.setState({isLoading: false});
+            browserHistory.push({pathname: '/home'});
             throw error;
+            
         }
     }
 
    render(){
        return (
-        <form className="sign-up-form-container">
-            <div className="form-internal">
-                <label htmlFor="email">Email</label>
-                <input onChange={this.handleEmailChange} id="email" placeholder='example@gmail.com'></input>
-                <label htmlFor="password">Password</label>
-                <input onChange={this.handlePasswordChange} id="password" placeholder='password'></input>
-                <label htmlFor="confirm_pass">Confirm Password</label>
-                <input onChange={this.handleConfirmPasswordChange} id="confirm_pass" placeholder='Confirm Password'></input>
-                <a onClick={this.handleSignup} className='small-signup-btn'>Sign up</a>
-            </div>
-        </form>
+        <div>
+            <form className="sign-up-form-container">
+                <div className="form-internal">
+                    <label htmlFor="email">Email</label>
+                    <input onChange={this.handleEmailChange} id="email" placeholder='example@gmail.com'></input>
+                    <label htmlFor="password">Password</label>
+                    <input onChange={this.handlePasswordChange} id="password" placeholder='password'></input>
+                    <label htmlFor="confirm_pass">Confirm Password</label>
+                    <input onChange={this.handleConfirmPasswordChange} id="confirm_pass" placeholder='Confirm Password'></input>
+                    <a onClick={this.handleSignup} className='small-signup-btn'>Sign up</a>
+                </div>
+            </form>
+            { this.state.isLoading && <Box mt={2} sx={{display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress />
+            </Box>}
+        </div>
    )}   
 }
 
