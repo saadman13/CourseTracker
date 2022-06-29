@@ -1,19 +1,67 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './Signup.css';
-class Signin extends React.Component{
+import {useHistory} from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import { axiosInstance } from '../axiosApi';
+import jwt_decode from "jwt-decode";
 
-    render(){
-        return (
+const Signin = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const history = useHistory();
+
+
+    const handleEmailChange = (event) => {
+        setEmail(event.target.value);
+    }
+
+    const handlePasswordChange = (event) => {
+        setPassword(event.target.value);
+    }
+
+    const handleSignin = async (event) => {
+        event.preventDefault();
+        setIsLoading(true);
+        try {
+            const response = await axiosInstance.post('token/obtain/', {
+                email: email,
+                password: password
+            });
+            console.log(response);
+            axiosInstance.defaults.headers['Authorization'] = "JWT " + response.data.access;
+            localStorage.setItem('access_token', response.data.access);
+            localStorage.setItem('refresh_token', response.data.refresh);
+            let decoded = jwt_decode(response.data.access);
+            setIsLoading(false);
+            console.log(decoded);
+            history.push('/home', {user_id: decoded.user_id});
+            return response;
+        } catch (error) {
+            alert(`Error! ${error.message}`)
+            console.log(error);
+            setIsLoading(false);
+            throw error;
+        }
+    }
+    return (
+        <div>
             <form className="sign-up-form-container">
                 <div className="form-internal">
                     <label For="email">Email</label>
-                    <input id="email" placeholder='example@gmail.com'></input>
+                    <input onChange={handleEmailChange} id="email" placeholder='example@gmail.com'></input>
                     <label For="password">Password</label>
-                    <input id="password" placeholder='password'></input>
-                    <a className='small-signup-btn'>Sign in</a>
+                    <input onChange={handlePasswordChange} type="password" id="password" placeholder='password'></input>
+                    <a onClick={handleSignin} className='small-signup-btn'>Sign in</a>
                 </div>
             </form>
-    )}
+            { isLoading && <Box mt={2} sx={{display: 'flex', justifyContent: 'center' }}>
+            <CircularProgress />
+            </Box>}
+        </div>
+    )
 }
 
 export default Signin;

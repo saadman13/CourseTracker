@@ -1,83 +1,67 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './Signup.css';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import { browserHistory} from 'react-router';
 import {axiosInstance} from '../axiosApi';
-class Signup extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            email: '',
-            password: '',
-            confirmPassword: '',
-            isLoading: false,
-        }
 
-        this.handleEmailChange = this.handleEmailChange.bind(this);
-        this.handlePasswordChange = this.handlePasswordChange.bind(this);
-        this.handleConfirmPasswordChange = this.handleConfirmPasswordChange.bind(this);
-        this.handleSignup = this.handleSignup.bind(this);
+
+const Signup = (props) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+
+    const handleEmailChange = (event) => {
+        setEmail(event.target.value);
     }
 
-    handleEmailChange = (event) => {
-        this.setState(state => {
-         return {...state, email: event.target.value};
-    })}
-
-    handlePasswordChange = (event) => {
-        this.setState(state => {
-            return {...state, password: event.target.value};
-       })
+    const handlePasswordChange = (event) => {
+        setPassword(event.target.value);
     }
 
-    handleConfirmPasswordChange = (event) => {
-        this.setState(state => {
-            return {...state, confirmPassword: event.target.value};
-       })
+    const handleConfirmPasswordChange = (event) => {
+        setConfirmPassword(event.target.value);
     }
 
-    handleSignup = async (event) => {
+    const handleSignup = async (event) => {
         event.preventDefault();
-        this.setState({isLoading: true});
+        setIsLoading(true);
         try {
             const response = await axiosInstance.post('user/create/', {
-                email: this.state.email,
-                password: this.state.password
+                email: email,
+                password: password
             });
-            axiosInstance.defaults.headers['Authorization'] = "JWT " + response.data.access;
-            localStorage.setItem('access_token', response.data.access);
-            localStorage.setItem('refresh_token', response.data.refresh);
-            this.setState({isLoading: false});
+            setIsLoading(false);
+            props.signinToggleHandler();
             return response;
         } catch (error) {
-            console.log("Eroor is here")
-            this.setState({isLoading: false});
-            browserHistory.push({pathname: '/home'});
+            alert(`Error! ${error.message}`)
+            console.log(error);
+            setIsLoading(false);
             throw error;
             
         }
     }
 
-   render(){
-       return (
+    return (
         <div>
             <form className="sign-up-form-container">
                 <div className="form-internal">
                     <label htmlFor="email">Email</label>
-                    <input onChange={this.handleEmailChange} id="email" placeholder='example@gmail.com'></input>
+                    <input onChange={handleEmailChange} id="email" placeholder='example@gmail.com'></input>
                     <label htmlFor="password">Password</label>
-                    <input onChange={this.handlePasswordChange} id="password" placeholder='password'></input>
+                    <input onChange={handlePasswordChange} type="password" id="password" placeholder='password'></input>
                     <label htmlFor="confirm_pass">Confirm Password</label>
-                    <input onChange={this.handleConfirmPasswordChange} id="confirm_pass" placeholder='Confirm Password'></input>
-                    <a onClick={this.handleSignup} className='small-signup-btn'>Sign up</a>
+                    <input onChange={handleConfirmPasswordChange} type="password" id="confirm_pass" placeholder='Confirm Password'></input>
+                    <a onClick={handleSignup} className='small-signup-btn'>Sign up</a>
                 </div>
             </form>
-            { this.state.isLoading && <Box mt={2} sx={{display: 'flex', justifyContent: 'center' }}>
+            { isLoading && <Box mt={2} sx={{display: 'flex', justifyContent: 'center' }}>
             <CircularProgress />
             </Box>}
         </div>
-   )}   
+    )
 }
 
 export default Signup;
