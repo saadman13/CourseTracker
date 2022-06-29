@@ -1,5 +1,7 @@
 import React from 'react';
 import './Signup.css';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 import {axiosInstance} from '../axiosApi';
 class Signup extends React.Component{
     constructor(props){
@@ -45,6 +47,8 @@ class Signup extends React.Component{
             localStorage.setItem('refresh_token', response.data.refresh);
             return response;
         } catch (error) {
+            console.log("Eroor is here")
+            this.setState({isLoading: false});
             throw error;
         }
     }
