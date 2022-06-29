@@ -9,10 +9,10 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <Route path="/home">
+        <Route path="/home" exact>
           <Main/>
         </Route>
-        <Route path="/">
+        <Route path="/" >
           <Home/>
         </Route>
       </div>
