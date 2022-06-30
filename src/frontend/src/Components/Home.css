@@ -21,11 +21,10 @@
 
 .button.sign-in.active{
     background: #3a6e7a;
-    color: orange;
 }
+
 .button.sign-up.active{
     background: #3a6e7a;
-    color: orange;
 }
 
 .button.sign-up{

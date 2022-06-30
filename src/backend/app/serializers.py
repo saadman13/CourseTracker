@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from .models import CustomUser, Semester
+from .models import CustomUser, Semester, Course
 # ...
 class CustomUserSerializer(serializers.ModelSerializer):
     """
@@ -28,4 +28,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class SemesterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Semester
+        fields = "__all__"
+
+class CourseSerializier(serializers.ModelSerializer):
+    class Meta:
+        model = Course
         fields = "__all__"

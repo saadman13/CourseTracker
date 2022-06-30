@@ -23,9 +23,19 @@ a {
 }
 
 a:hover{
-    color: orange;
+    /* color: orange; */
 }
 
+.sem-course-block{
+    position: relative;
+    min-width: 600px;
+}
+
+.trash-can{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
 
 .course{
     width: 150px;
