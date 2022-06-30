@@ -12,7 +12,13 @@ class App extends React.Component {
         <Route path="/home" exact>
           <Main/>
         </Route>
-        <Route path="/" >
+        <Route path="/" exact>
+          <Home/>
+        </Route>
+        <Route path="/signin" exact>
+          <Home/>
+        </Route>
+        <Route path="/signup" exact>
           <Home/>
         </Route>
       </div>

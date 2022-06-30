@@ -17,7 +17,7 @@ const Main = () => {
         let res = await fetchSemesters();
         let semList = [];
        setSemesters(res.data.semesters);
-    }, [fetchSemesters])
+    }, [])
 
     const getUserId = () => location.state.user_id;
 

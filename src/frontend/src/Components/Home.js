@@ -30,6 +30,7 @@ const Home = (props) => {
     let signInStyle = `button sign-in ${isSignup ? '' : 'active'}`;
     return (
         <div class='main-main-container'>
+            {showAlert && <Alert style={{ width:'40%', margin: '0 auto'}} onClose={() => {}}>Signup Successful! Please sign in</Alert>}
             <h1> Lets manage your courses!</h1>
             <div class='main-container'>
                 <div class="btn-container">
@@ -37,7 +38,6 @@ const Home = (props) => {
                     <Link onClick={signinToggleHandler} to='/signin' className={signInStyle}>Sign in</Link>
                 </div>
             </div>
-            {showAlert && <Alert onClose={() => {}}>Signup Successful! Please sign in</Alert>}
             {isSignup && <Signup signinToggleHandler={signinToggleHandler2} /> }
             { !isSignup && <Signin />}
         </div>
