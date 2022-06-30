@@ -1,6 +1,7 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from .models import CustomUser, Semester, Course
+from django.db import IntegrityError
 # ...
 class CustomUserSerializer(serializers.ModelSerializer):
     """
@@ -21,7 +22,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
         instance = self.Meta.model(**validated_data)  # as long as the fields are the same, we can just use this
         if password is not None:
             instance.set_password(password)
-        instance.save()
+
+        try:
+            instance.save()
+
+        # the exception raised here is different than
+        # serializers.ValidationError
+    
+        except IntegrityError as e:
+            raise exceptions.AuthenticationFailed('Email already exists')
         return instance
 
 

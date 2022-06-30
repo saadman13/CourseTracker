@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import { axiosInstance } from '../axiosApi';
 import jwt_decode from "jwt-decode";
 
-const Signin = () => {
+const Signin = (props) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -40,10 +40,22 @@ const Signin = () => {
             history.push('/home', {user_id: decoded.user_id});
             return response;
         } catch (error) {
-            alert(`Error! ${error.message}`)
             console.log(error);
-            setIsLoading(false);
-            throw error;
+            const res = error.response.data;
+
+            let message='';
+            Object.keys(res).map((keyName) => {
+              console.log(keyName);// eslint-disable-line no-console
+              console.log(res[keyName]);// eslint-disable-line no-console
+              
+              if(keyName.toUpperCase() === 'DETAIL')
+                message += `Error: ${res[keyName]}\n`
+              else 
+                message += `${keyName.toUpperCase()}: ${res[keyName]}\n`
+              props.renderErrorHandler(message);
+              return res[keyName];
+            })
+            setIsLoading(false);    
         }
     }
     return (
