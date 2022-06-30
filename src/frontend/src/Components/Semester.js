@@ -13,10 +13,22 @@ const Semester = (props) => {
     const [newCourse, setNewCourse] = useState('');
     const [courses, setCourses] = useState([]);
 
-    useEffect(async () => {
-        let res = await fetchCourses();
-        debugger;
-       setCourses(res.data.courses);
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const response = await axiosInstance.get(`courses/${props.semester.id}`);
+                console.log(response);
+                setCourses(response.data.courses);
+                return response;
+            } catch (error) {
+                alert(`Error! ${error.message}`)
+                console.log(error);
+                throw error;
+            }
+        }
+        
+        fetchCourses();
+ 
        const node = loadCSS(
         'https://use.fontawesome.com/releases/v5.14.0/css/all.css',
         // Inject before JSS
@@ -28,17 +40,7 @@ const Semester = (props) => {
     }, [])
 
 
-    const fetchCourses = async () => {
-        try {
-            const response = await axiosInstance.get(`courses/${props.semester.id}`);
-            console.log(response);
-            return response;
-        } catch (error) {
-            alert(`Error! ${error.message}`)
-            console.log(error);
-            throw error;
-        }
-    } 
+    
 
     const onChangeHandler = (event) => {
         setNewCourse(event.target.value);
@@ -94,8 +96,8 @@ const Semester = (props) => {
             </span>
             {courses.length !== 0 && <ul id='courses'>
                 {courses.map((course,idx) => (
-                    <div key={courses.id} className='course'>
-                        <li>
+                    <div className='course'>
+                        <li key={courses.id}>
                             <a href={`https://www.google.com/search?q=${course}`}> {course.name}</a>
                             <button onClick={() => {
                                     deleteCourse(course);
