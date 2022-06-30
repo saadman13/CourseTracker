@@ -20,6 +20,10 @@ class CustomUser(AbstractUser):
 class Semester(models.Model):
     name = models.CharField(max_length=255)
     made_by = models.ForeignKey(CustomUser, related_name='semesters', on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-date']
 
 class Course(models.Model):
     name = models.CharField(max_length=255)
