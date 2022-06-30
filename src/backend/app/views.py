@@ -1,5 +1,5 @@
 from rest_framework_simplejwt.views import TokenObtainPairView  
-from rest_framework import status, permissions
+from rest_framework import status, permissions, exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Course, CustomUser, Semester
@@ -16,7 +16,11 @@ class CustomUserCreate(APIView):
         # pdb.set_trace();
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
+            try:
+                user = serializer.save()
+            except exceptions.AuthenticationFailed as e:
+                return Response({'error': request.data['email'] + " already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
             if user:
                 json = serializer.data
                 return Response(json, status=status.HTTP_201_CREATED)

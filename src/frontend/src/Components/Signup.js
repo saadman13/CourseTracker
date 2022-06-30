@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './Signup.css';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 import {axiosInstance} from '../axiosApi';
 
 
@@ -10,6 +11,7 @@ const Signup = (props) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
 
     const handleEmailChange = (event) => {
@@ -36,11 +38,26 @@ const Signup = (props) => {
             props.signinToggleHandler();
             return response;
         } catch (error) {
-            alert(`Error! ${error.message}`)
+            
             console.log(error);
             setIsLoading(false);
-            throw error;
-            
+            const res = error.response.data;
+
+            let message='';
+            Object.keys(res).map((keyName) => {
+              console.log(keyName);// eslint-disable-line no-console
+              console.log(res[keyName]);// eslint-disable-line no-console
+              
+            //   if (keyName === 'error') {
+            //     for (let i = 0; i < res.Errors.length; i += 1) {
+            //       message += res.Errors[i];
+            //     }
+            //     console.log(`message is ${message}`);
+            //  
+              message += `${keyName.toUpperCase()}: ${res[keyName]}\n`
+              props.renderErrorHandler(message);
+              return res[keyName];
+            })    
         }
     }
 

@@ -49,13 +49,13 @@ class TestSemesters(TestSetup):
                 HTTP_AUTHORIZATION="JWT " + res_token.data['access'],
                 format="json")
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data['semester_name'], 'Fall 2021')
         db_request = Semester.objects.get(id=res.data['semester_id'])
         self.assertEqual('Fall 2021', db_request.name)
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
     def add_semesters_to_user(self,user):
         sem_names = ['Fall 2021', 'Winter 2020', 'Summer 2023']
