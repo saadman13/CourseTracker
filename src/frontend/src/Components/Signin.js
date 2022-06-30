@@ -50,9 +50,9 @@ const Signin = () => {
         <div>
             <form className="sign-up-form-container">
                 <div className="form-internal">
-                    <label For="email">Email</label>
+                    <label htmlFor="email">Email</label>
                     <input onChange={handleEmailChange} id="email" placeholder='example@gmail.com'></input>
-                    <label For="password">Password</label>
+                    <label htmlFor="password">Password</label>
                     <input onChange={handlePasswordChange} type="password" id="password" placeholder='password'></input>
                     <a onClick={handleSignin} className='small-signup-btn'>Sign in</a>
                 </div>

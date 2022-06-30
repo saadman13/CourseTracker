@@ -5,6 +5,12 @@ import { green } from '@mui/material/colors';
 import Icon from '@mui/material/Icon';
 import { loadCSS } from 'fg-loadcss';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import './Semester.css';
 import { axiosInstance } from '../axiosApi';
 
@@ -12,6 +18,7 @@ import { axiosInstance } from '../axiosApi';
 const Semester = (props) => {
     const [newCourse, setNewCourse] = useState('');
     const [courses, setCourses] = useState([]);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -40,7 +47,18 @@ const Semester = (props) => {
     }, [])
 
 
+    const handleClickOpen = () => {
+        setOpen(true);
+      };
     
+    const handleAgreeToDeleteSem = async (deleteSemesterHandler, semester) => {
+        await deleteSemesterHandler(semester);
+        setOpen(false);
+    };
+
+    const handleDisagreeToDeleteSem = () => {
+        setOpen(false);
+    }
 
     const onChangeHandler = (event) => {
         setNewCourse(event.target.value);
@@ -90,15 +108,30 @@ const Semester = (props) => {
                     return props.deleteSemesterHandler(props.semester);
                 }} className='del-sem-btn'>Delete Semester</button> */}
                 <div className='trash-can'>
-                    <DeleteOutlinedIcon  onClick={() => {
-                    return props.deleteSemesterHandler(props.semester); }} sx={{ cursor: 'pointer' } }/>
+                    <DeleteOutlinedIcon  onClick={handleClickOpen} sx={{ cursor: 'pointer' } }/>
                 </div>
+                <Dialog
+                    open={open}
+                    onClose={handleDisagreeToDeleteSem}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">
+                        {"Are you sure you want to delete the semester?"}
+                    </DialogTitle>
+                    <DialogActions>
+                        <Button onClick={handleDisagreeToDeleteSem}>Disagree</Button>
+                        <Button onClick={() => handleAgreeToDeleteSem(props.deleteSemesterHandler, props.semester)} autoFocus>
+                            Agree
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </span>
             {courses.length !== 0 && <ul id='courses'>
-                {courses.map((course,idx) => (
+                {courses.map((course) => (
                     <div className='course'>
                         <li key={courses.id}>
-                            <a href={`https://www.google.com/search?q=${course}`}> {course.name}</a>
+                            <a href={`https://www.google.com/search?q=${course}`}>{course.name}</a>
                             <button onClick={() => {
                                     deleteCourse(course);
                                 }} className='delete-course-btn'> 

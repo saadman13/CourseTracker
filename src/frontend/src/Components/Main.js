@@ -79,7 +79,7 @@ const Main = () => {
             throw error;
         }
     }
-
+   
     return (
         <React.Fragment>
             <h1 className='title'>Welcome To Course Tracker</h1>
@@ -93,7 +93,9 @@ const Main = () => {
                     <Box mb={3} pt={3}>
                         <TextField onChange={onChangeHandler} value={newSemester} fullWidth label="Semester Name" id="fullWidth" />
                     </Box>
-                    <Button onClick={addSemesterHandler} className="buttonStyle" variant="contained">Add Semester</Button>
+                    <Button x={{
+                        width: 300,
+                    }} onClick={addSemesterHandler} className="buttonStyle" variant="contained">Add Semester</Button>
                 </Box>
             </div>
             <ul className='semester-heading'>
