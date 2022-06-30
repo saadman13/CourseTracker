@@ -13,27 +13,38 @@ const Main = () => {
     const [semesters, setSemesters] = useState([]);
     const location = useLocation();
     
-    useEffect(async () => {
-        let res = await fetchSemesters();
-        let semList = [];
-       setSemesters(res.data.semesters);
+    useEffect(() => {
+        // let res = await fetchSemesters();
+        const fetchSemesters = async () => {
+            try {
+                console.log(`user id = ${getUserId()}`);
+                const response = await axiosInstance.get(`semesters/${getUserId()}`, {user_id : getUserId});
+                setSemesters(response.data.semesters);
+                console.log(response);
+                return response;
+            } catch (error) {
+                alert(`Error! ${error.message}`)
+                console.log(error);
+                throw error;
+            }
+        } 
+        fetchSemesters();
     }, [])
 
     const getUserId = () => location.state.user_id;
 
-    const fetchSemesters = async () => {
-        try {
-            console.log(`user id = ${getUserId()}`);
-            const response = await axiosInstance.get(`semesters/${getUserId()}`, {user_id : getUserId});
-            debugger
-            console.log(response);
-            return response;
-        } catch (error) {
-            alert(`Error! ${error.message}`)
-            console.log(error);
-            throw error;
-        }
-    } 
+    // const fetchSemesters = async () => {
+    //     try {
+    //         console.log(`user id = ${getUserId()}`);
+    //         const response = await axiosInstance.get(`semesters/${getUserId()}`, {user_id : getUserId});
+    //         console.log(response);
+    //         return response;
+    //     } catch (error) {
+    //         alert(`Error! ${error.message}`)
+    //         console.log(error);
+    //         throw error;
+    //     }
+    // } 
 
     const onChangeHandler = (event) => {
         console.log(event.target.value);
@@ -68,7 +79,7 @@ const Main = () => {
             throw error;
         }
     }
-
+   
     return (
         <React.Fragment>
             <h1 className='title'>Welcome To Course Tracker</h1>
@@ -82,11 +93,13 @@ const Main = () => {
                     <Box mb={3} pt={3}>
                         <TextField onChange={onChangeHandler} value={newSemester} fullWidth label="Semester Name" id="fullWidth" />
                     </Box>
-                    <Button onClick={addSemesterHandler} className="buttonStyle" variant="contained">Add Semester</Button>
+                    <Button x={{
+                        width: 300,
+                    }} onClick={addSemesterHandler} className="buttonStyle" variant="contained">Add Semester</Button>
                 </Box>
             </div>
             <ul className='semester-heading'>
-                {semesters.map((semester, idx) => <Semester key={semester.id} deleteSemesterHandler={deleteSemesterHandler} semester={semester}/>)}
+                {semesters.map((semester, idx) => <li key={semester.id}><Semester deleteSemesterHandler={deleteSemesterHandler} semester={semester}/></li>)}
             </ul>
         </React.Fragment>
     )

@@ -3,6 +3,7 @@ import Main from './Components/Main';
 import Home from './Components/Home';
 import Signup from './Components/Signup';
 import { Route } from 'react-router-dom';
+import Signin from './Components/Signin';
 
 
 class App extends React.Component {
@@ -16,10 +17,10 @@ class App extends React.Component {
           <Home/>
         </Route>
         <Route path="/signin" exact>
-          <Home/>
+          <Home isSignup={false} />
         </Route>
         <Route path="/signup" exact>
-          <Home/>
+          <Home isSignup={true}/>
         </Route>
       </div>
     );
