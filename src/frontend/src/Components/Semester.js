@@ -25,11 +25,11 @@ const Semester = (props) => {
     return (
         <div className="sem-course-block">
             <span className='course-span'>
-                <h2>{props.semesterName}</h2>
+                <h2>{props.semester.name}</h2>
                 <input onChange={onChangeHandler} value={newCourse} className='course-input' type="text" placeholder='Course name'></input>
                 <button onClick={addCourseHandler} className='btn'>Add Course</button>
                 <button onClick={() => {
-                    return props.deleteSemesterHandler(props.semesterName);
+                    return props.deleteSemesterHandler(props.semester);
                 }} className='del-sem-btn'>Delete Semester</button>
             </span>
             {courses.length !== 0 && <ul id='courses'>

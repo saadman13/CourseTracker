@@ -25,13 +25,18 @@ SECRET_KEY = 'django-insecure-(r0ue1#+cen9+jdfo_f$apb^#1k4gj102i0j@2ne7t$zyr-@#!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS=['*']
+ALLOWED_HOSTS=["*"]
 
                
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
-
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+] # If this is used, then not need to use `CORS_ALLOW_ALL_ORIGINS = True`
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:3000',
+]
 
 
 # Application definition
@@ -81,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+     'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'courseTracker.urls'
