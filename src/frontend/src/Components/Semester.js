@@ -107,26 +107,26 @@ const Semester = (props) => {
                 {/* <button onClick={() => {
                     return props.deleteSemesterHandler(props.semester);
                 }} className='del-sem-btn'>Delete Semester</button> */}
-                <div className='trash-can'>
-                    <DeleteOutlinedIcon  onClick={handleClickOpen} sx={{ cursor: 'pointer' } }/>
-                </div>
-                <Dialog
-                    open={open}
-                    onClose={handleDisagreeToDeleteSem}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <DialogTitle id="alert-dialog-title">
-                        {"Are you sure you want to delete the semester?"}
-                    </DialogTitle>
-                    <DialogActions>
-                        <Button onClick={handleDisagreeToDeleteSem}>Disagree</Button>
-                        <Button onClick={() => handleAgreeToDeleteSem(props.deleteSemesterHandler, props.semester)} autoFocus>
-                            Agree
-                        </Button>
-                    </DialogActions>
-                </Dialog>
             </span>
+            <div className='trash-can'>
+                <DeleteOutlinedIcon  onClick={handleClickOpen} sx={{ cursor: 'pointer' } }/>
+            </div>
+            <Dialog
+                open={open}
+                onClose={handleDisagreeToDeleteSem}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Are you sure you want to delete the semester?"}
+                </DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleDisagreeToDeleteSem}>Disagree</Button>
+                    <Button onClick={() => handleAgreeToDeleteSem(props.deleteSemesterHandler, props.semester)} autoFocus>
+                        Agree
+                    </Button>
+                </DialogActions>
+            </Dialog>
             {courses.length !== 0 && <ul id='courses'>
                 {courses.map((course) => (
                     <div className='course'>
