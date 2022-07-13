@@ -37,6 +37,10 @@ a:hover{
     right: 0;
 }
 
+.trash-can:hover{
+    color: red;
+}
+
 .course{
     min-width: 150px;
     display: flex;
