@@ -4,6 +4,7 @@ import Home from './Components/Home';
 import Signup from './Components/Signup';
 import { Route } from 'react-router-dom';
 import Signin from './Components/Signin';
+import CourseDetails from './Components/CourseDetails';
 
 
 class App extends React.Component {
@@ -15,6 +16,9 @@ class App extends React.Component {
         </Route>
         <Route path="/" exact>
           <Home/>
+        </Route>
+        <Route path="/courseDetails/:id" exact>
+          <CourseDetails />
         </Route>
         <Route path="/signin" exact>
           <Home isSignup={false} />

@@ -49,8 +49,8 @@ const Home = (props) => {
         <div className='main-main-container'>
             {errorAlert && <Alert style={{ width:'40%', margin: '0 auto'}} severity="error" onClose={closeErrorHandler}>{errorAlert}</Alert>}
             {showAlert && <Alert style={{ width:'40%', margin: '0 auto'}} onClose={closeSuccessHandler}>Signup Successful! Please sign in</Alert>}
-            <h1> Lets manage your courses!</h1>
-            <div className='main-container'>
+            <h1 className='title-home'> Lets manage your courses!</h1>
+            <div className='main-container'>    
                 <div className="btn-container">
                     <Link onClick={signupToggleHandler} to='/signup' className={signUpStyle}>Sign up</Link>
                     <Link onClick={signinToggleHandler} to='/signin' className={signInStyle}>Sign in</Link>
