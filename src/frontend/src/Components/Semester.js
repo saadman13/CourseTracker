@@ -10,6 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
+import {useHistory} from 'react-router-dom';
 import DialogTitle from '@mui/material/DialogTitle';
 import './Semester.css';
 import { axiosInstance } from '../axiosApi';
@@ -19,6 +20,8 @@ const Semester = (props) => {
     const [newCourse, setNewCourse] = useState('');
     const [courses, setCourses] = useState([]);
     const [open, setOpen] = useState(false);
+
+    const history = useHistory();
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -91,6 +94,10 @@ const Semester = (props) => {
         }
     }
 
+    const viewDetailsHandler = (courseId, courseName) => {
+        history.push(`courseDetails/${courseId}`, {courseName: courseName});
+    }
+
 
     return (
         <div className="sem-course-block">
@@ -137,6 +144,9 @@ const Semester = (props) => {
                                 }} className='delete-course-btn'> 
                                 Delete
                             </button>
+                            <button onClick={() => {
+                                viewDetailsHandler(course.id, course.name)
+                            }}>View Details</button>
                         </li>
                     </div>
                 ))}
