@@ -13,6 +13,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './CourseDetails.css';
 
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs};
   }
@@ -47,14 +55,25 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 const CourseDetails = () => {
     const location = useLocation();
-    debugger;
     const params = useParams();
+
+    const [open, setOpen] = useState(false);
+
+    const handleClickOpen = () => {
+      setOpen(true);
+      console.log("Open");
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+
     console.log(location.state.courseName);
     return (
         <div>
             <div className="main-title">
                 <h1 className="course-name-title">{location.state.courseName.toLocaleUpperCase()}</h1>
-                <button className="add-comp-btn">Add a component</button>
+                <button className="add-comp-btn" onClick={handleClickOpen}>Add a component</button>
             </div>
             <TableContainer component={Paper}>
                 <Table stickyHeader sx={{ minWidth: 650 }} aria-label="simple table">
@@ -105,6 +124,58 @@ const CourseDetails = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Add a component</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                            Grade Received and Expected Grade could be left empty initially.
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="Component Name"
+                        label="Component Name"
+                        placeholder='Assignment 1'
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="Weight"
+                        label="Weight (%)"
+                        type="number"
+                        fullWidth
+                        placeholder='15'
+                        variant="standard"
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="Grade Received"
+                        label="Grade Received (%)"
+                        placeholder='80'
+                        type="number"
+                        fullWidth
+                        variant="standard"
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="Expected Grade"
+                        label="Expected Grade (%)"
+                        type="number"
+                        placeholder='85'
+                        fullWidth
+                        variant="standard"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleClose}>Add</Button>
+                </DialogActions>
+            </Dialog>       
         </div>
     );
 }
