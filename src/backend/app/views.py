@@ -2,8 +2,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status, permissions, exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Course, CustomUser, Semester
-from .serializers import SemesterSerializer,CustomUserSerializer,CourseSerializier
+from .models import Component, Course, CustomUser, Semester
+from .serializers import ComponentSerializer, SemesterSerializer,CustomUserSerializer,CourseSerializier
 from datetime import datetime
 import pytz
 
@@ -72,8 +72,6 @@ class CourseView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self,request, id):
-        # import pdb
-        # pdb.set_trace()
         semester = Semester.objects.get(id=id)
         courses = semester.courses
         
@@ -86,4 +84,28 @@ class CourseView(APIView):
         response['details'] = 'Course Deleted'
         return Response(response, status=status.HTTP_200_OK)
 
+
+class ComponentView(APIView):
+
+    def post(self,request,id):
+        # import pdb; pdb.set_trace()
+        request.data['belongs_to'] = id #Sets it to the course whose id is passed in
+        serializer = ComponentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self,request, id):
+        course = Course.objects.get(id=id)
+        components = course.components
+        
+        serializer = CourseSerializier(components,many=True)
+        return Response({'courses': serializer.data}, status=status.HTTP_200_OK)
+
+    def delete(self,request,id):
+        Component.objects.get(id=id).delete()
+        response = {}
+        response['details'] = 'Component Deleted'
+        return Response(response, status=status.HTTP_200_OK)
         
