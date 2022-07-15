@@ -100,8 +100,8 @@ class ComponentView(APIView):
         course = Course.objects.get(id=id)
         components = course.components
         
-        serializer = CourseSerializier(components,many=True)
-        return Response({'courses': serializer.data}, status=status.HTTP_200_OK)
+        serializer = ComponentSerializer(components,many=True)
+        return Response({'components': serializer.data}, status=status.HTTP_200_OK)
 
     def delete(self,request,id):
         Component.objects.get(id=id).delete()

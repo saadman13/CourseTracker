@@ -21,16 +21,18 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs};
-  }
+import { axiosInstance } from '../axiosApi';
+
+// function createData(name, calories, fat, carbs, protein) {
+//     return { name, calories, fat, carbs};
+//   }
   
-const rows = [
-    createData('Midterm 1', 20, 100, 100),
-    createData('Midterm 2', 25,100, 100),
-    createData('Assignment1', 15, 100, 100),
-    createData('Final', 40, 100, 100),
-];
+// const rows = [
+//     createData('Midterm 1', 20, 100, 100),
+//     createData('Midterm 2', 25,100, 100),
+//     createData('Assignment1', 15, 100, 100),
+//     createData('Final', 40, 100, 100),
+// ];
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -57,7 +59,67 @@ const CourseDetails = () => {
     const location = useLocation();
     const params = useParams();
 
+    const [newComponent, setNewComponent] = useState({});
+    const [components, setComponents] = useState([]);
     const [open, setOpen] = useState(false);
+    const [totalWeight, setTotalWeight] = useState(0.0);
+    const [totalGradeReceived, setTotalGradeReceived] = useState(0.0);
+    const [totalGoalGrade, setTotalGoalGrade] = useState(0.0);
+
+    useEffect(() => {
+        const fetchCourseComponents = async () => {
+            try {
+                const response = await axiosInstance.get(`courses/components/${params.id}`);
+                console.log(response);
+                setComponents(response.data.components);
+                return response;
+            } catch (error) {
+                alert(`Error! ${error.message}`)
+                console.log(error);
+                throw error;
+            }
+        }
+        
+        fetchCourseComponents();
+ 
+    }, []);
+
+    // useEffect(() => {
+    //     console.log("Hello");
+    //     console.log(components);
+    //     calcTotal();
+    // }, components)
+
+    const calcWeight = () => {
+        let sum = 0;
+        for (let component of components){
+            console.log(component);
+            sum += component.weight;
+        }
+        return sum;
+    }
+
+    const calcGradeReceived = () => {
+        let gradeReceived = 0;
+        for(let component of components){
+            gradeReceived += (component.weight/100) * (component.grade_received/100);
+        }
+        return gradeReceived * 100;
+    }
+
+    const calcGoalGrade = () => {
+        let goalGrade = 0;
+        for(let component of components){
+            goalGrade += (component.weight/100) * (component.goal_grade/100);
+        }
+        return goalGrade * 100;
+    }
+
+    // const calcTotal = () => {
+    //     setTotalWeight(sumWeight());
+    //     setTotalGradeReceived(calcGradeReceived());
+    //     setTotalGoalGrade(calcGoalGrade());
+    // }
 
     const handleClickOpen = () => {
       setOpen(true);
@@ -68,7 +130,42 @@ const CourseDetails = () => {
       setOpen(false);
     };
 
-    console.log(location.state.courseName);
+    const handleAddComponent = async () => {
+        try {
+            const response = await axiosInstance.post(`courses/components/${params.id}`, {...newComponent})
+            setComponents(prevComponents => [response.data, ...prevComponents]);
+            setNewComponent({});
+            setOpen(false);
+            return response;
+        } catch (error) {
+            alert(`Error! ${error.message}`)
+            console.log(error);
+            throw error;
+        }
+    }
+
+    const componentNameHandler = (event) => {
+        setNewComponent((prev) => {
+            return { ...prev, name: event.target.value}
+        });
+    }
+    const weightHandler = (event) => {
+        setNewComponent((prev) => {
+            return { ...prev, weight: parseInt(event.target.value)}
+        });
+    }
+    const gradeReceivedHandler = (event) => {
+        setNewComponent((prev) => {
+            return { ...prev, grade_received: parseInt(event.target.value)}
+        });
+    }
+    const expectedGradeHandler = (event) => {
+        setNewComponent((prev) => {
+            return { ...prev, goal_grade: parseInt(event.target.value)}
+        });
+    }
+
+    console.log(params);
     return (
         <div>
             <div className="main-title">
@@ -87,17 +184,17 @@ const CourseDetails = () => {
                         </TableRow>   
                     </TableHead>
                     <TableBody>
-                        {rows.map((row) => (
+                        {components.map((component) => (
                             <StyledTableRow
-                                key={row.name}
+                                key={component.id}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <StyledTableCell component="th" scope="row" >
-                                    {row.name}
+                                    {component.name}
                                 </StyledTableCell>
-                                <StyledTableCell align="right">{row.calories}</StyledTableCell>
-                                <StyledTableCell align="right">{row.fat}</StyledTableCell>
-                                <StyledTableCell align="right">{row.carbs}</StyledTableCell>
+                                <StyledTableCell align="right">{component.weight}</StyledTableCell>
+                                <StyledTableCell align="right">{component.grade_received}</StyledTableCell>
+                                <StyledTableCell align="right">{component.goal_grade}</StyledTableCell>
                                 <StyledTableCell align="right">
                                     <EditIcon
                                         sx={{ cursor: 'pointer' }}
@@ -111,19 +208,25 @@ const CourseDetails = () => {
                             </StyledTableRow>
                         ))}
         
-                        <StyledTableRow
+                        {components.length > 0 && <StyledTableRow
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <StyledTableCell component="th" scope="row" >
                                     Total
                                 </StyledTableCell>
-                                <StyledTableCell align="right">100</StyledTableCell>
-                                <StyledTableCell align="right">100</StyledTableCell>
-                                <StyledTableCell align="right">100</StyledTableCell>
-                        </StyledTableRow>
+                                <StyledTableCell align="right">{calcWeight()}</StyledTableCell>
+                                <StyledTableCell align="right">{calcGradeReceived().toFixed(2)}</StyledTableCell>
+                                <StyledTableCell align="right">{calcGoalGrade().toFixed(2)}</StyledTableCell>
+                        </StyledTableRow>}
                     </TableBody>
                 </Table>
             </TableContainer>
+            <div class="feedback-container">
+                <h2>Feedback:</h2>
+                <p>
+                    out of <span className="feedback-total">{calcWeight()}%</span> of the course, you have received <span className="feedback-total">{calcGradeReceived().toFixed(2)}%</span>. Your goal grade at this point was to get <span className="feedback-total">{calcGoalGrade().toFixed(2)}</span>%.
+                </p>
+            </div>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Add a component</DialogTitle>
                 <DialogContent>
@@ -138,6 +241,7 @@ const CourseDetails = () => {
                         placeholder='Assignment 1'
                         type="text"
                         fullWidth
+                        onChange={componentNameHandler}
                         variant="standard"
                     />
                     <TextField
@@ -148,6 +252,7 @@ const CourseDetails = () => {
                         type="number"
                         fullWidth
                         placeholder='15'
+                        onChange={weightHandler}
                         variant="standard"
                     />
                     <TextField
@@ -158,6 +263,7 @@ const CourseDetails = () => {
                         placeholder='80'
                         type="number"
                         fullWidth
+                        onChange={gradeReceivedHandler}
                         variant="standard"
                     />
                     <TextField
@@ -168,12 +274,13 @@ const CourseDetails = () => {
                         type="number"
                         placeholder='85'
                         fullWidth
+                        onChange={expectedGradeHandler}
                         variant="standard"
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleClose}>Add</Button>
+                    <Button onClick={handleAddComponent}>Add</Button>
                 </DialogActions>
             </Dialog>       
         </div>
