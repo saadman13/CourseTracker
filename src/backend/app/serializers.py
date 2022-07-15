@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers, exceptions
-from .models import CustomUser, Semester, Course
+from .models import CustomUser, Semester, Course, Component
 from django.db import IntegrityError
 # ...
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -42,4 +42,9 @@ class SemesterSerializer(serializers.ModelSerializer):
 class CourseSerializier(serializers.ModelSerializer):
     class Meta:
         model = Course
+        fields = "__all__"
+
+class ComponentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Component
         fields = "__all__"

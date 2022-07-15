@@ -29,4 +29,9 @@ class Course(models.Model):
     name = models.CharField(max_length=255)
     belongs_to = models.ForeignKey(Semester, related_name='courses', on_delete=models.CASCADE)
 
-
+class Component(models.Model):
+    name = models.CharField(max_length=255)
+    weight = models.IntegerField()
+    grade_received = models.IntegerField()
+    goal_grade = models.IntegerField()
+    belongs_to = models.ForeignKey(Course, related_name='components', on_delete=models.CASCADE)
