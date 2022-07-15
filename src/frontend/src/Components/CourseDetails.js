@@ -23,17 +23,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import { axiosInstance } from '../axiosApi';
 
-// function createData(name, calories, fat, carbs, protein) {
-//     return { name, calories, fat, carbs};
-//   }
-  
-// const rows = [
-//     createData('Midterm 1', 20, 100, 100),
-//     createData('Midterm 2', 25,100, 100),
-//     createData('Assignment1', 15, 100, 100),
-//     createData('Final', 40, 100, 100),
-// ];
-
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.warning.dark,
@@ -62,9 +51,11 @@ const CourseDetails = () => {
     const [newComponent, setNewComponent] = useState({});
     const [components, setComponents] = useState([]);
     const [open, setOpen] = useState(false);
-    const [totalWeight, setTotalWeight] = useState(0.0);
-    const [totalGradeReceived, setTotalGradeReceived] = useState(0.0);
-    const [totalGoalGrade, setTotalGoalGrade] = useState(0.0);
+    const [options, setOptions] = useState([]);
+    const [hasFinishedCourse, setHasFinishedCourse] = useState(false);
+    // const [totalWeight, setTotalWeight] = useState(0.0);
+    // const [totalGradeReceived, setTotalGradeReceived] = useState(0.0);
+    // const [totalGoalGrade, setTotalGoalGrade] = useState(0.0);
 
     useEffect(() => {
         const fetchCourseComponents = async () => {
@@ -81,27 +72,51 @@ const CourseDetails = () => {
         }
         
         fetchCourseComponents();
+        updateOptions();
  
     }, []);
 
-    // useEffect(() => {
-    //     console.log("Hello");
-    //     console.log(components);
-    //     calcTotal();
-    // }, components)
+    useEffect(() => {
+        updateOptions();
+    }, [components]);
+    useEffect(() => {
+        console.log("OPtions updated");
+        console.log(options);
+    }, [options]);
 
     const calcWeight = () => {
         let sum = 0;
         for (let component of components){
-            console.log(component);
             sum += component.weight;
         }
         return sum;
     }
 
+    const calcTotalWeightCompleted = () => {
+        let sum = 0;
+        for (let component of components){
+            if (component.grade_received < 0)
+                continue;
+            sum += component.weight;
+        }
+        return sum;
+    }
+
+    const calcTotalGoalGradeTillNow = () => {
+        let goalGrade = 0;
+        for(let component of components){
+            if (component.goal_grade < 0 || component.grade_received < 0)
+                continue;
+            goalGrade += (component.weight/100) * (component.goal_grade/100);
+        }
+        return goalGrade * 100;
+    }
+
     const calcGradeReceived = () => {
         let gradeReceived = 0;
         for(let component of components){
+            if (component.grade_received < 0)
+                continue;
             gradeReceived += (component.weight/100) * (component.grade_received/100);
         }
         return gradeReceived * 100;
@@ -110,20 +125,74 @@ const CourseDetails = () => {
     const calcGoalGrade = () => {
         let goalGrade = 0;
         for(let component of components){
+            if (component.goal_grade < 0)
+                continue;
             goalGrade += (component.weight/100) * (component.goal_grade/100);
         }
         return goalGrade * 100;
     }
 
-    // const calcTotal = () => {
-    //     setTotalWeight(sumWeight());
-    //     setTotalGradeReceived(calcGradeReceived());
-    //     setTotalGoalGrade(calcGoalGrade());
+    // const setMessageWhenNoneLeft = () => {
+    //     let remainingWeight = calcWeight() - calcTotalWeightCompleted();
+    //     let neededGrade = (calcGoalGrade() - (calcWeight() - remainingWeight) * calcGradeReceived())/ remainingWeight;
+    //     setOptions([{name: `on the remaining ${remainingWeight}% of the course`, neededGrade: neededGrade}])
     // }
+
+    const hasCompWithoutGrade = () => {
+        for (let component of components){
+            if(component.grade_received < 0 && component.goal_grade > 0)
+                return true;
+        }
+        //setMessageWhenNoneLeft();
+        return false; 
+    }
+
+    if(calcTotalWeightCompleted() === 100){
+        setHasFinishedCourse(true);
+    }
+
+
+    const updateOptions = () => {
+        let neededGrade = -1;
+        let totalGradeReceivedSoFar = 0;
+        let totalGoalGradeSoFar = 0;
+
+        let doneComponents =  components.filter(component => component.grade_received >= 0 && component.goal_grade >= 0);
+        for (let doneComponent of doneComponents){
+            totalGradeReceivedSoFar += doneComponent.weight * doneComponent.grade_received;
+            totalGoalGradeSoFar += doneComponent.weight * doneComponent.goal_grade;
+        }
+
+        let toDoComponents = components.filter(component => component.grade_received < 0 && component.goal_grade > 0);
+        // debugger;
+        for (let i = 0; i < toDoComponents.length; i++){
+            let component = toDoComponents[i];
+            if(component.grade_received < 0 && component.goal_grade > 0){
+                totalGoalGradeSoFar += component.weight * component.goal_grade;
+                neededGrade = (totalGoalGradeSoFar/100 - totalGradeReceivedSoFar/100)/component.weight;
+                if (neededGrade <= 1 && neededGrade > 0){
+                
+                    setOptions((prev) => {
+                        return [...prev,{name: component.name, neededGrade: neededGrade}]
+                    })
+                    return;
+                
+                }else if (neededGrade > 1){
+                    // if(i === toDoComponents.length - 1){
+                    //     setOptions([]);
+                    //     return;
+                    // }
+                    setOptions((prev) => {
+                        return [...prev, {name: component.name, neededGrade: 100}]
+                    });
+                    totalGoalGradeSoFar += 100 * component.weight;
+                }
+            }
+        }
+    }
 
     const handleClickOpen = () => {
       setOpen(true);
-      console.log("Open");
     };
   
     const handleClose = () => {
@@ -132,10 +201,34 @@ const CourseDetails = () => {
 
     const handleAddComponent = async () => {
         try {
+            if (!('grade_received' in newComponent) || newComponent.grade_received === ''){
+                console.log("grade_received is blank");
+                newComponent.grade_received = -1;
+            }
+            if (!('goal_grade' in newComponent) || newComponent.goal_grade === ''){
+                console.log("goal_grade is blank");
+                newComponent.goal_grade = -1;
+            }
+
+            
             const response = await axiosInstance.post(`courses/components/${params.id}`, {...newComponent})
             setComponents(prevComponents => [response.data, ...prevComponents]);
             setNewComponent({});
             setOpen(false);
+            return response;
+        } catch (error) {
+            alert(`Error! ${error.message}`)
+            console.log(error);
+            throw error;
+        }
+    }
+
+    const deleteComponentHandler = async (comp) => {
+        try {
+            const response = await axiosInstance.delete(`courses/components/${comp.id}`);
+            setComponents((prevComponents) => {
+                return prevComponents.filter(component => component.id !== comp.id);
+            });
             return response;
         } catch (error) {
             alert(`Error! ${error.message}`)
@@ -165,7 +258,8 @@ const CourseDetails = () => {
         });
     }
 
-    console.log(params);
+    let list = options.map((option) => <li key={option.name}>Atleast score <span className='option-needed-grade'>{(option.neededGrade*100).toFixed(2)}%</span> on <span className='option-name'>{option.name}</span></li>);
+            
     return (
         <div>
             <div className="main-title">
@@ -193,8 +287,8 @@ const CourseDetails = () => {
                                     {component.name}
                                 </StyledTableCell>
                                 <StyledTableCell align="right">{component.weight}</StyledTableCell>
-                                <StyledTableCell align="right">{component.grade_received}</StyledTableCell>
-                                <StyledTableCell align="right">{component.goal_grade}</StyledTableCell>
+                                <StyledTableCell align="right">{component.grade_received === -1 ? '-' : component.grade_received}</StyledTableCell>
+                                <StyledTableCell align="right">{component.goal_grade === -1 ? '-' : component.goal_grade}</StyledTableCell>
                                 <StyledTableCell align="right">
                                     <EditIcon
                                         sx={{ cursor: 'pointer' }}
@@ -202,6 +296,7 @@ const CourseDetails = () => {
                                     /> 
                                     <DeleteIcon 
                                         sx={{ cursor: 'pointer' }}
+                                        onClick={ () => deleteComponentHandler(component)}
                                     />
                                     
                                 </StyledTableCell>
@@ -221,11 +316,46 @@ const CourseDetails = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <div class="feedback-container">
+            <div className="feedback-container">
                 <h2>Feedback:</h2>
                 <p>
-                    out of <span className="feedback-total">{calcWeight()}%</span> of the course, you have received <span className="feedback-total">{calcGradeReceived().toFixed(2)}%</span>. Your goal grade at this point was to get <span className="feedback-total">{calcGoalGrade().toFixed(2)}</span>%.
+                    You have scored <span className="feedback-total">{calcGradeReceived().toFixed(2)}%</span> of the <span className="feedback-total">{calcTotalWeightCompleted()}%</span> of the course that you received a grade for. Your goal grade at this point was to get <span className="feedback-total">{calcTotalGoalGradeTillNow().toFixed(2)}</span>%.
                 </p>
+
+                {!hasFinishedCourse &&
+                    <div>
+                        {calcGradeReceived() < calcTotalGoalGradeTillNow() &&
+                            <div>
+                                <h3 className='fallen-behind-goal-txt'> Looks like you have fallen behind</h3>
+                                <p> To be back on track with your goal, you need to: </p>
+                                {hasCompWithoutGrade() && options.length > 0 && <ul>{list} </ul>}
+                            </div>
+
+                        }
+                    </div>}
+
+                {!hasFinishedCourse &&
+                    <div>
+                        {calcGradeReceived() === calcTotalGoalGradeTillNow() &&
+                            <div>
+                                <h3 className='on-track-with-goal-txt'>You are on track with your goal, keep up the great!!</h3>
+                            </div>
+
+                        }
+                    </div>}
+
+                {!hasFinishedCourse &&
+                    <div>
+                        {calcGradeReceived() > calcTotalGoalGradeTillNow() &&
+                            <div>
+                                <h3 className='better-than-goal-txt'>Congratulations! You have exceeded your goals so far!</h3>
+                            </div>
+
+                        }
+                    </div>}
+
+                {hasFinishedCourse && <p> Congratulations you are done with the course!</p>}
+
             </div>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Add a component</DialogTitle>
