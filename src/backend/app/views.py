@@ -96,6 +96,17 @@ class ComponentView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self,request, id):
+        component = Component.objects.get(id=id)
+        if not component:
+            return Response({}, status= status.HTTP_404_NOT_FOUND)
+
+        serializer = ComponentSerializer(component,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+
     def get(self,request, id):
         course = Course.objects.get(id=id)
         components = course.components
