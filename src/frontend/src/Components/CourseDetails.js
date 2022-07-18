@@ -9,8 +9,12 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
+
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DoneIcon from '@mui/icons-material/Done';
+import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
+
 import './CourseDetails.css';
 
 import Button from '@mui/material/Button';
@@ -52,16 +56,17 @@ const CourseDetails = () => {
             name: "",
             weight: '',
             grade_received: '',
-            goal_grade: ''
+            goal_grade: '',
+            due_date: ''
     });
     const [components, setComponents] = useState([]);
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
-    const [hasFinishedCourse, setHasFinishedCourse] = useState(false);
+    // const [hasFinishedCourse, setHasFinishedCourse] = useState(false);
     const [isNotPossibleFeedback, setIsNotPossibleFeedback] = useState(false);
     const [hasUnknownComponent, setHasUnknownComponent] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    // const [totalWeight, setTotalWeight] = useState(0.0);
+    const [totalWeightCompleted, setTotalWeightCompleted] = useState(0);
     // const [totalGradeReceived, setTotalGradeReceived] = useState(0.0);
     // const [totalGoalGrade, setTotalGoalGrade] = useState(0.0);
 
@@ -86,7 +91,9 @@ const CourseDetails = () => {
 
     useEffect(() => {
         updateOptions();
+        setTotalWeightCompleted(calcTotalWeightCompleted());
     }, [components]);
+
     useEffect(() => {
         console.log("OPtions updated");
         console.log(options);
@@ -140,6 +147,24 @@ const CourseDetails = () => {
         return goalGrade * 100;
     }
 
+    const isPossibleToPredict = () => {
+        for(let component of components){
+            if (component.grade_receieved < 0 && component.goal_grade < 0)
+                return false;
+        }
+        return true;
+    }
+
+    const calcPredictedGrade = () => {
+        let currentScore = calcGradeReceived();
+
+        let futureComponents = components.filter(component => component.grade_received < 0 && component.goal_grade >= 0);
+        for(let futureComponent of  futureComponents){
+            currentScore += futureComponent.goal_grade * (futureComponent.weight/100);
+        }
+        return currentScore; 
+    }
+
     // const setMessageWhenNoneLeft = () => {
     //     let remainingWeight = calcWeight() - calcTotalWeightCompleted();
     //     let neededGrade = (calcGoalGrade() - (calcWeight() - remainingWeight) * calcGradeReceived())/ remainingWeight;
@@ -155,10 +180,24 @@ const CourseDetails = () => {
         return false; 
     }
 
-    if(calcTotalWeightCompleted() === 100){
-        setHasFinishedCourse(true);
+    // if(calcTotalWeightCompleted() === 100){
+    //     setHasFinishedCourse(true);
+    // }
+
+    function formatDate(date) {
+        const options = { month: 'long', day: 'numeric', year: 'numeric' };
+        const formattedDate = new Date(date);
+        return formattedDate.toLocaleDateString('en-US', options);
     }
 
+    const sortArrByDate = (comps) => {
+        comps.sort(function(a,b){
+
+            return new Date(a.due_date) - new Date(b.due_date);
+          });
+        return comps;
+    }
+    
 
     const updateOptions = () => {
         setOptions([]);
@@ -226,9 +265,7 @@ const CourseDetails = () => {
     };
   
     const handleClose = () => {
-      if(isEditing){
-        setIsEditing(false);
-      }
+      setIsEditing(false);
       setOpen(false);
     };
 
@@ -245,12 +282,13 @@ const CourseDetails = () => {
 
             
             const response = await axiosInstance.post(`courses/components/${params.id}`, {...newComponent})
-            setComponents(prevComponents => [response.data, ...prevComponents]);
+            setComponents(prevComponents => sortArrByDate([response.data, ...prevComponents]));
             setNewComponent({
                 name: "",
                 weight: "",
                 grade_received: "",
-                goal_grade: ""
+                goal_grade: "",
+                due_date: ""
             });
             setOpen(false);
             return response;
@@ -294,6 +332,9 @@ const CourseDetails = () => {
 
             const response = await axiosInstance.put(`courses/components/${newComponent.id}`, {...newComponent});
             // debugger;
+
+            // sort the components by date
+            
             setComponents(prevComponents => {
                 let result = [];
                 for (let component of prevComponents){
@@ -302,15 +343,17 @@ const CourseDetails = () => {
                     else
                         result.push(component);
                 }
-                return result;
+                return sortArrByDate(result);
             })
             setNewComponent({
                 name: "",
                 weight: "",
                 grade_received: "",
-                goal_grade: ""
+                goal_grade: "",
+                due_date: ""
             });
             setOpen(false);
+            setIsEditing(false);
             
             return response;
         } catch (error) {
@@ -331,6 +374,7 @@ const CourseDetails = () => {
         });
     }
     const gradeReceivedHandler = (event) => {
+        debugger;
         console.log(event.target.value);
         if (event.target.value === '')
             setNewComponent((prev) => {
@@ -352,6 +396,12 @@ const CourseDetails = () => {
             });
     }
 
+    const dueDateHandler = (event) => {
+        setNewComponent((prev) => {
+            return { ...prev, due_date: event.target.value}
+        });
+    }
+
     let listOfLi = options.map((option,idx) => {
         if (idx == options.length - 1)
             return <li key={option.name}>Atleast score <span className='option-needed-grade'>{(option.neededGrade*100).toFixed(2)}%</span> on <span className='option-name'>{option.name}</span></li>
@@ -363,7 +413,7 @@ const CourseDetails = () => {
     return (
         <div>
             <div className="main-title">
-                <h1 className="course-name-title">{location.state.courseName.toLocaleUpperCase()}</h1>
+                <h1 className="course-name-title">{location.state.courseName.toLocaleUpperCase()} {totalWeightCompleted === 100 ? <DoneOutlineIcon sx={{ color: 'green' }}/> : ''}</h1>
                 <button className="add-comp-btn" onClick={handleClickOpen}>Add a component</button>
             </div>
             <TableContainer component={Paper}>
@@ -372,8 +422,10 @@ const CourseDetails = () => {
                         <TableRow>
                             <StyledTableCell>Component</StyledTableCell>
                             <StyledTableCell align="right">Weight (%)</StyledTableCell>
+                            <StyledTableCell align="right">Completed Weight (%)</StyledTableCell>
                             <StyledTableCell align="right">Grade Received&nbsp;(%)</StyledTableCell>
                             <StyledTableCell align="right">Expected Grade&nbsp;(%)</StyledTableCell>
+                            <StyledTableCell align="right">Due Date</StyledTableCell>
                             <StyledTableCell align="right">Actions</StyledTableCell>
                         </TableRow>   
                     </TableHead>
@@ -387,8 +439,10 @@ const CourseDetails = () => {
                                     {component.name}
                                 </StyledTableCell>
                                 <StyledTableCell align="right">{component.weight}</StyledTableCell>
+                                <StyledTableCell align="right">{component.grade_received === -1 ? "-" : <DoneIcon></DoneIcon>}</StyledTableCell>
                                 <StyledTableCell align="right">{component.grade_received === -1 ? '-' : component.grade_received}</StyledTableCell>
                                 <StyledTableCell align="right">{component.goal_grade === -1 ? '-' : component.goal_grade}</StyledTableCell>
+                                <StyledTableCell align="right">{formatDate(component.due_date)}</StyledTableCell>
                                 <StyledTableCell align="right">
                                     <EditIcon
                                         sx={{ cursor: 'pointer' }}
@@ -410,6 +464,7 @@ const CourseDetails = () => {
                                     Total
                                 </StyledTableCell>
                                 <StyledTableCell align="right">{calcWeight()}</StyledTableCell>
+                                <StyledTableCell align="right">{calcTotalWeightCompleted()}</StyledTableCell>
                                 <StyledTableCell align="right">{calcGradeReceived().toFixed(2)}</StyledTableCell>
                                 <StyledTableCell align="right">{calcGoalGrade().toFixed(2)}</StyledTableCell>
                         </StyledTableRow>}
@@ -424,32 +479,22 @@ const CourseDetails = () => {
                         You have scored <span className="feedback-total">{calcGradeReceived().toFixed(2)}%</span> of the <span className="feedback-total">{calcTotalWeightCompleted()}%</span> of the course that you received a grade for. Your goal grade at this point was to get <span className="feedback-total">{calcTotalGoalGradeTillNow().toFixed(2)}</span>%.
                     </p>
                 </>}
-                {!hasFinishedCourse &&
+                {totalWeightCompleted < 100 &&
                     <div>
-                        {calcGradeReceived() < calcTotalGoalGradeTillNow() &&
+                        {calcGradeReceived().toFixed(2) < calcTotalGoalGradeTillNow().toFixed(2) &&
                             <div>
                                 <h3 className='fallen-behind-goal-txt'> Looks like you have fallen behind</h3>
                                 <p> To be back on track with your goal, you need to: </p>
                                 {hasCompWithoutGrade() && options.length > 0 && <ul>{listOfLi} </ul>}
                                 {hasUnknownComponent && <p>Your components do not add up to 100%, so please add other components.</p>}
-                                {isNotPossibleFeedback && <p>Sorry, looks like it won't be possible to reach your original goal for this course!</p>} 
-
-                           </div>
-
-                        }
-                    </div>}
-
-                {!hasFinishedCourse && components.length > 0 &&
-                    <div>
-                        {calcGradeReceived() === calcTotalGoalGradeTillNow() &&
-                            <div>
-                                <h3 className='on-track-with-goal-txt'>You are on track with your goal, keep up the great work!</h3>
+                                {isNotPossibleFeedback && <p className="">Sorry, looks like it won't be possible to reach your original goal for this course!</p>} 
                             </div>
 
                         }
-                    </div>}
+                    </div>
+                }
 
-                {!hasFinishedCourse && components.length > 0 &&
+                {totalWeightCompleted < 100 &&
                     <div>
                         {calcGradeReceived() > calcTotalGoalGradeTillNow() &&
                             <div>
@@ -457,16 +502,30 @@ const CourseDetails = () => {
                             </div>
 
                         }
-                    </div>}
 
-                {hasFinishedCourse && <p> Congratulations you are done with the course!</p>}
+                        {calcGradeReceived().toFixed(2) === calcTotalGoalGradeTillNow().toFixed(2) &&
+                            <div>
+                                <h3 className='on-track-with-goal-txt'>You are on track with your goal, keep up the great work!</h3>
+                            </div>
+
+                        }
+
+                        <h3>Predicted Score: </h3>  
+                        {isPossibleToPredict && <p>Assuming you get your expected grade (goal) for the rest of the components, you will end up with a final score of <span className='feedback-total'>{calcPredictedGrade().toFixed(2)}/{calcWeight()}%</span>.</p>}
+                        {!isPossibleToPredict && <p>Not possible to predict since all components do not have a expected grade specified.</p>}
+                    </div>
+                }
+
+                {calcWeight() < 100 && <div className='insert-rem-components-txt'>Note: To get a better experience, please fill out all components. Currently, you have provided only {calcWeight()}% of the components.</div>}
+
+                {totalWeightCompleted === 100 && <p className='course-completed-txt'> Congratulations you are done with the course!</p>}
 
             </div>
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Add a component</DialogTitle>
+                <DialogTitle>{isEditing? "Edit the component" : "Add a component"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                            Grade Received and Expected Grade could be left empty initially.
+                            Course name and weight cannot be empty.
                     </DialogContentText>
                     <TextField
                         autoFocus
@@ -499,7 +558,7 @@ const CourseDetails = () => {
                         label="Grade Received (%)"
                         placeholder='80'
                         type="number"
-                        value={newComponent.grade_received}
+                        value={newComponent.grade_received === -1 ? '' : newComponent.grade_received}
                         fullWidth
                         onChange={gradeReceivedHandler}
                         variant="standard"
@@ -510,10 +569,21 @@ const CourseDetails = () => {
                         id="Expected Grade"
                         label="Expected Grade (%)"
                         type="number"
-                        value={newComponent.goal_grade}
+                        value={newComponent.goal_grade === -1 ? '' : newComponent.goal_grade}
                         placeholder='85'
                         fullWidth
                         onChange={expectedGradeHandler}
+                        variant="standard"
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="Due date"
+                        label="Due date"
+                        type="date"
+                        value={newComponent.due_date.slice(0,10)}
+                        fullWidth
+                        onChange={dueDateHandler}
                         variant="standard"
                     />
                 </DialogContent>
