@@ -13,6 +13,7 @@ import { styled } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DoneIcon from '@mui/icons-material/Done';
+import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
 
 import './CourseDetails.css';
 
@@ -187,7 +188,15 @@ const CourseDetails = () => {
         const options = { month: 'long', day: 'numeric', year: 'numeric' };
         const formattedDate = new Date(date);
         return formattedDate.toLocaleDateString('en-US', options);
-      }
+    }
+
+    const sortArrByDate = (comps) => {
+        comps.sort(function(a,b){
+
+            return new Date(a.due_date) - new Date(b.due_date);
+          });
+        return comps;
+    }
     
 
     const updateOptions = () => {
@@ -273,7 +282,7 @@ const CourseDetails = () => {
 
             
             const response = await axiosInstance.post(`courses/components/${params.id}`, {...newComponent})
-            setComponents(prevComponents => [response.data, ...prevComponents]);
+            setComponents(prevComponents => sortArrByDate([response.data, ...prevComponents]));
             setNewComponent({
                 name: "",
                 weight: "",
@@ -323,6 +332,9 @@ const CourseDetails = () => {
 
             const response = await axiosInstance.put(`courses/components/${newComponent.id}`, {...newComponent});
             // debugger;
+
+            // sort the components by date
+            
             setComponents(prevComponents => {
                 let result = [];
                 for (let component of prevComponents){
@@ -331,7 +343,7 @@ const CourseDetails = () => {
                     else
                         result.push(component);
                 }
-                return result;
+                return sortArrByDate(result);
             })
             setNewComponent({
                 name: "",
@@ -401,7 +413,7 @@ const CourseDetails = () => {
     return (
         <div>
             <div className="main-title">
-                <h1 className="course-name-title">{location.state.courseName.toLocaleUpperCase()}</h1>
+                <h1 className="course-name-title">{location.state.courseName.toLocaleUpperCase()} {totalWeightCompleted === 100 ? <DoneOutlineIcon sx={{ color: 'green' }}/> : ''}</h1>
                 <button className="add-comp-btn" onClick={handleClickOpen}>Add a component</button>
             </div>
             <TableContainer component={Paper}>
@@ -469,7 +481,7 @@ const CourseDetails = () => {
                 </>}
                 {totalWeightCompleted < 100 &&
                     <div>
-                        {calcGradeReceived() < calcTotalGoalGradeTillNow() &&
+                        {calcGradeReceived().toFixed(2) < calcTotalGoalGradeTillNow().toFixed(2) &&
                             <div>
                                 <h3 className='fallen-behind-goal-txt'> Looks like you have fallen behind</h3>
                                 <p> To be back on track with your goal, you need to: </p>
@@ -482,7 +494,7 @@ const CourseDetails = () => {
                     </div>
                 }
 
-                {totalWeightCompleted < 100 && components.length > 0 &&
+                {totalWeightCompleted < 100 &&
                     <div>
                         {calcGradeReceived() > calcTotalGoalGradeTillNow() &&
                             <div>
@@ -491,7 +503,7 @@ const CourseDetails = () => {
 
                         }
 
-                        {calcGradeReceived() === calcTotalGoalGradeTillNow() &&
+                        {calcGradeReceived().toFixed(2) === calcTotalGoalGradeTillNow().toFixed(2) &&
                             <div>
                                 <h3 className='on-track-with-goal-txt'>You are on track with your goal, keep up the great work!</h3>
                             </div>
@@ -499,10 +511,12 @@ const CourseDetails = () => {
                         }
 
                         <h3>Predicted Score: </h3>  
-                        {isPossibleToPredict && <p>Assuming you get your expected grade (goal) for the rest of the components, you will end up with a final score of <span className='feedback-total'>{calcPredictedGrade().toFixed(2)}%</span>.</p>}
+                        {isPossibleToPredict && <p>Assuming you get your expected grade (goal) for the rest of the components, you will end up with a final score of <span className='feedback-total'>{calcPredictedGrade().toFixed(2)}/{calcWeight()}%</span>.</p>}
                         {!isPossibleToPredict && <p>Not possible to predict since all components do not have a expected grade specified.</p>}
                     </div>
                 }
+
+                {calcWeight() < 100 && <div className='insert-rem-components-txt'>Note: To get a better experience, please fill out all components. Currently, you have provided only {calcWeight()}% of the components.</div>}
 
                 {totalWeightCompleted === 100 && <p className='course-completed-txt'> Congratulations you are done with the course!</p>}
 
@@ -544,7 +558,7 @@ const CourseDetails = () => {
                         label="Grade Received (%)"
                         placeholder='80'
                         type="number"
-                        value={newComponent.grade_received}
+                        value={newComponent.grade_received === -1 ? '' : newComponent.grade_received}
                         fullWidth
                         onChange={gradeReceivedHandler}
                         variant="standard"
@@ -555,7 +569,7 @@ const CourseDetails = () => {
                         id="Expected Grade"
                         label="Expected Grade (%)"
                         type="number"
-                        value={newComponent.goal_grade}
+                        value={newComponent.goal_grade === -1 ? '' : newComponent.goal_grade}
                         placeholder='85'
                         fullWidth
                         onChange={expectedGradeHandler}
