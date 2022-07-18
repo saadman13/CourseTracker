@@ -35,3 +35,7 @@ class Component(models.Model):
     grade_received = models.IntegerField()
     goal_grade = models.IntegerField()
     belongs_to = models.ForeignKey(Course, related_name='components', on_delete=models.CASCADE)
+    due_date = models.DateTimeField()
+
+    class Meta:
+        ordering = ['due_date']

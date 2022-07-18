@@ -9,8 +9,11 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
+
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DoneIcon from '@mui/icons-material/Done';
+
 import './CourseDetails.css';
 
 import Button from '@mui/material/Button';
@@ -52,7 +55,8 @@ const CourseDetails = () => {
             name: "",
             weight: '',
             grade_received: '',
-            goal_grade: ''
+            goal_grade: '',
+            due_date: ''
     });
     const [components, setComponents] = useState([]);
     const [open, setOpen] = useState(false);
@@ -179,6 +183,12 @@ const CourseDetails = () => {
     //     setHasFinishedCourse(true);
     // }
 
+    function formatDate(date) {
+        const options = { month: 'long', day: 'numeric', year: 'numeric' };
+        const formattedDate = new Date(date);
+        return formattedDate.toLocaleDateString('en-US', options);
+      }
+    
 
     const updateOptions = () => {
         setOptions([]);
@@ -268,7 +278,8 @@ const CourseDetails = () => {
                 name: "",
                 weight: "",
                 grade_received: "",
-                goal_grade: ""
+                goal_grade: "",
+                due_date: ""
             });
             setOpen(false);
             return response;
@@ -326,7 +337,8 @@ const CourseDetails = () => {
                 name: "",
                 weight: "",
                 grade_received: "",
-                goal_grade: ""
+                goal_grade: "",
+                due_date: ""
             });
             setOpen(false);
             setIsEditing(false);
@@ -372,6 +384,12 @@ const CourseDetails = () => {
             });
     }
 
+    const dueDateHandler = (event) => {
+        setNewComponent((prev) => {
+            return { ...prev, due_date: event.target.value}
+        });
+    }
+
     let listOfLi = options.map((option,idx) => {
         if (idx == options.length - 1)
             return <li key={option.name}>Atleast score <span className='option-needed-grade'>{(option.neededGrade*100).toFixed(2)}%</span> on <span className='option-name'>{option.name}</span></li>
@@ -395,6 +413,7 @@ const CourseDetails = () => {
                             <StyledTableCell align="right">Completed Weight (%)</StyledTableCell>
                             <StyledTableCell align="right">Grade Received&nbsp;(%)</StyledTableCell>
                             <StyledTableCell align="right">Expected Grade&nbsp;(%)</StyledTableCell>
+                            <StyledTableCell align="right">Due Date</StyledTableCell>
                             <StyledTableCell align="right">Actions</StyledTableCell>
                         </TableRow>   
                     </TableHead>
@@ -408,9 +427,10 @@ const CourseDetails = () => {
                                     {component.name}
                                 </StyledTableCell>
                                 <StyledTableCell align="right">{component.weight}</StyledTableCell>
-                                <StyledTableCell align="right">{component.grade_received === -1 ? "False" : "True"}</StyledTableCell>
+                                <StyledTableCell align="right">{component.grade_received === -1 ? "-" : <DoneIcon></DoneIcon>}</StyledTableCell>
                                 <StyledTableCell align="right">{component.grade_received === -1 ? '-' : component.grade_received}</StyledTableCell>
                                 <StyledTableCell align="right">{component.goal_grade === -1 ? '-' : component.goal_grade}</StyledTableCell>
+                                <StyledTableCell align="right">{formatDate(component.due_date)}</StyledTableCell>
                                 <StyledTableCell align="right">
                                     <EditIcon
                                         sx={{ cursor: 'pointer' }}
@@ -539,6 +559,17 @@ const CourseDetails = () => {
                         placeholder='85'
                         fullWidth
                         onChange={expectedGradeHandler}
+                        variant="standard"
+                    />
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="Due date"
+                        label="Due date"
+                        type="date"
+                        value={newComponent.due_date.slice(0,10)}
+                        fullWidth
+                        onChange={dueDateHandler}
                         variant="standard"
                     />
                 </DialogContent>
