@@ -57,11 +57,11 @@ const CourseDetails = () => {
     const [components, setComponents] = useState([]);
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState([]);
-    const [hasFinishedCourse, setHasFinishedCourse] = useState(false);
+    // const [hasFinishedCourse, setHasFinishedCourse] = useState(false);
     const [isNotPossibleFeedback, setIsNotPossibleFeedback] = useState(false);
     const [hasUnknownComponent, setHasUnknownComponent] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    // const [totalWeight, setTotalWeight] = useState(0.0);
+    const [totalWeightCompleted, setTotalWeightCompleted] = useState(0);
     // const [totalGradeReceived, setTotalGradeReceived] = useState(0.0);
     // const [totalGoalGrade, setTotalGoalGrade] = useState(0.0);
 
@@ -86,7 +86,9 @@ const CourseDetails = () => {
 
     useEffect(() => {
         updateOptions();
+        setTotalWeightCompleted(calcTotalWeightCompleted());
     }, [components]);
+
     useEffect(() => {
         console.log("OPtions updated");
         console.log(options);
@@ -140,6 +142,24 @@ const CourseDetails = () => {
         return goalGrade * 100;
     }
 
+    const isPossibleToPredict = () => {
+        for(let component of components){
+            if (component.grade_receieved < 0 && component.goal_grade < 0)
+                return false;
+        }
+        return true;
+    }
+
+    const calcPredictedGrade = () => {
+        let currentScore = calcGradeReceived();
+
+        let futureComponents = components.filter(component => component.grade_received < 0 && component.goal_grade >= 0);
+        for(let futureComponent of  futureComponents){
+            currentScore += futureComponent.goal_grade * (futureComponent.weight/100);
+        }
+        return currentScore; 
+    }
+
     // const setMessageWhenNoneLeft = () => {
     //     let remainingWeight = calcWeight() - calcTotalWeightCompleted();
     //     let neededGrade = (calcGoalGrade() - (calcWeight() - remainingWeight) * calcGradeReceived())/ remainingWeight;
@@ -155,9 +175,9 @@ const CourseDetails = () => {
         return false; 
     }
 
-    if(calcTotalWeightCompleted() === 100){
-        setHasFinishedCourse(true);
-    }
+    // if(calcTotalWeightCompleted() === 100){
+    //     setHasFinishedCourse(true);
+    // }
 
 
     const updateOptions = () => {
@@ -226,9 +246,7 @@ const CourseDetails = () => {
     };
   
     const handleClose = () => {
-      if(isEditing){
-        setIsEditing(false);
-      }
+      setIsEditing(false);
       setOpen(false);
     };
 
@@ -311,6 +329,7 @@ const CourseDetails = () => {
                 goal_grade: ""
             });
             setOpen(false);
+            setIsEditing(false);
             
             return response;
         } catch (error) {
@@ -331,6 +350,7 @@ const CourseDetails = () => {
         });
     }
     const gradeReceivedHandler = (event) => {
+        debugger;
         console.log(event.target.value);
         if (event.target.value === '')
             setNewComponent((prev) => {
@@ -372,6 +392,7 @@ const CourseDetails = () => {
                         <TableRow>
                             <StyledTableCell>Component</StyledTableCell>
                             <StyledTableCell align="right">Weight (%)</StyledTableCell>
+                            <StyledTableCell align="right">Completed Weight (%)</StyledTableCell>
                             <StyledTableCell align="right">Grade Received&nbsp;(%)</StyledTableCell>
                             <StyledTableCell align="right">Expected Grade&nbsp;(%)</StyledTableCell>
                             <StyledTableCell align="right">Actions</StyledTableCell>
@@ -387,6 +408,7 @@ const CourseDetails = () => {
                                     {component.name}
                                 </StyledTableCell>
                                 <StyledTableCell align="right">{component.weight}</StyledTableCell>
+                                <StyledTableCell align="right">{component.grade_received === -1 ? "False" : "True"}</StyledTableCell>
                                 <StyledTableCell align="right">{component.grade_received === -1 ? '-' : component.grade_received}</StyledTableCell>
                                 <StyledTableCell align="right">{component.goal_grade === -1 ? '-' : component.goal_grade}</StyledTableCell>
                                 <StyledTableCell align="right">
@@ -410,6 +432,7 @@ const CourseDetails = () => {
                                     Total
                                 </StyledTableCell>
                                 <StyledTableCell align="right">{calcWeight()}</StyledTableCell>
+                                <StyledTableCell align="right">{calcTotalWeightCompleted()}</StyledTableCell>
                                 <StyledTableCell align="right">{calcGradeReceived().toFixed(2)}</StyledTableCell>
                                 <StyledTableCell align="right">{calcGoalGrade().toFixed(2)}</StyledTableCell>
                         </StyledTableRow>}
@@ -424,7 +447,7 @@ const CourseDetails = () => {
                         You have scored <span className="feedback-total">{calcGradeReceived().toFixed(2)}%</span> of the <span className="feedback-total">{calcTotalWeightCompleted()}%</span> of the course that you received a grade for. Your goal grade at this point was to get <span className="feedback-total">{calcTotalGoalGradeTillNow().toFixed(2)}</span>%.
                     </p>
                 </>}
-                {!hasFinishedCourse &&
+                {totalWeightCompleted < 100 &&
                     <div>
                         {calcGradeReceived() < calcTotalGoalGradeTillNow() &&
                             <div>
@@ -432,24 +455,14 @@ const CourseDetails = () => {
                                 <p> To be back on track with your goal, you need to: </p>
                                 {hasCompWithoutGrade() && options.length > 0 && <ul>{listOfLi} </ul>}
                                 {hasUnknownComponent && <p>Your components do not add up to 100%, so please add other components.</p>}
-                                {isNotPossibleFeedback && <p>Sorry, looks like it won't be possible to reach your original goal for this course!</p>} 
-
-                           </div>
-
-                        }
-                    </div>}
-
-                {!hasFinishedCourse && components.length > 0 &&
-                    <div>
-                        {calcGradeReceived() === calcTotalGoalGradeTillNow() &&
-                            <div>
-                                <h3 className='on-track-with-goal-txt'>You are on track with your goal, keep up the great work!</h3>
+                                {isNotPossibleFeedback && <p className="">Sorry, looks like it won't be possible to reach your original goal for this course!</p>} 
                             </div>
 
                         }
-                    </div>}
+                    </div>
+                }
 
-                {!hasFinishedCourse && components.length > 0 &&
+                {totalWeightCompleted < 100 && components.length > 0 &&
                     <div>
                         {calcGradeReceived() > calcTotalGoalGradeTillNow() &&
                             <div>
@@ -457,16 +470,28 @@ const CourseDetails = () => {
                             </div>
 
                         }
-                    </div>}
 
-                {hasFinishedCourse && <p> Congratulations you are done with the course!</p>}
+                        {calcGradeReceived() === calcTotalGoalGradeTillNow() &&
+                            <div>
+                                <h3 className='on-track-with-goal-txt'>You are on track with your goal, keep up the great work!</h3>
+                            </div>
+
+                        }
+
+                        <h3>Predicted Score: </h3>  
+                        {isPossibleToPredict && <p>Assuming you get your expected grade (goal) for the rest of the components, you will end up with a final score of <span className='feedback-total'>{calcPredictedGrade().toFixed(2)}%</span>.</p>}
+                        {!isPossibleToPredict && <p>Not possible to predict since all components do not have a expected grade specified.</p>}
+                    </div>
+                }
+
+                {totalWeightCompleted === 100 && <p className='course-completed-txt'> Congratulations you are done with the course!</p>}
 
             </div>
             <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Add a component</DialogTitle>
+                <DialogTitle>{isEditing? "Edit the component" : "Add a component"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                            Grade Received and Expected Grade could be left empty initially.
+                            Course name and weight cannot be empty.
                     </DialogContentText>
                     <TextField
                         autoFocus
